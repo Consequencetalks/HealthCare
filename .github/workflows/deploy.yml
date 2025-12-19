@@ -26,20 +26,18 @@ jobs:
         with:
           node-version: 18
           cache: npm
-          cache-dependency-path: HealthCare/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install
-        working-directory: HealthCare
         run: npm ci
 
       - name: Build (base = /<repo>/)
-        working-directory: HealthCare
         run: npm run build -- --base=/${{ github.event.repository.name }}/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: HealthCare/dist
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
