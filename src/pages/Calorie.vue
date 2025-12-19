@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { parseNumber } from '../utils/number'
 import { toKg, toM } from '../utils/units'
@@ -12,6 +12,7 @@ const ageValue = ref('')
 const heightUnit = ref('cm') // 'cm' | 'm' | 'ft'
 const weightUnit = ref('kg') // 'kg' | 'jin' | 'lb'
 const sex = ref('male') // 'male' | 'female'
+const openMenu = ref(null) // 'height' | 'weight' | null
 
 const result = ref(null) // { bmr: number, hint: string, activityFactor?: number, activityLabel?: string, activityExplain?: string, tdee?: number }
 const error = ref('')
@@ -35,6 +36,40 @@ const weightPlaceholder = computed(() => {
 const agePlaceholder = computed(() => 'e.g. 25')
 
 // parseNumber/toKg/toM moved to src/utils for reuse + testing
+
+function toggleMenu(which) {
+  openMenu.value = openMenu.value === which ? null : which
+}
+
+function closeMenus() {
+  openMenu.value = null
+}
+
+function setHeightUnit(u) {
+  heightUnit.value = u
+  closeMenus()
+  result.value = null
+  error.value = ''
+}
+
+function setWeightUnit(u) {
+  weightUnit.value = u
+  closeMenus()
+  result.value = null
+  error.value = ''
+}
+
+const closeOnWindowClick = () => {
+  closeMenus()
+}
+
+onMounted(() => {
+  window.addEventListener('click', closeOnWindowClick, true)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', closeOnWindowClick, true)
+})
 
 // 活动强度问答（用于估算 TDEE）
 const showActivityWizard = ref(false)
@@ -259,14 +294,22 @@ function reset() {
           <span class="label">Height ({{ heightUnitText }})</span>
           <div class="inputRow">
             <input v-model.trim="heightValue" class="input" inputmode="decimal" autocomplete="off" :placeholder="heightPlaceholder" />
-            <div class="unitSelect">
-              <select v-model="heightUnit" class="nativeSelect" aria-label="Height unit">
-                <option value="cm">centimeter (cm)</option>
-                <option value="m">meter (m)</option>
-                <option value="ft">foot (ft)</option>
-              </select>
-              <span class="selectText">{{ heightUnitText }}</span>
-              <span class="chev" aria-hidden="true">▾</span>
+            <div class="unitSelect" :class="{ open: openMenu === 'height' }" @click.stop @keydown.esc="closeMenus">
+              <button class="unitBtn" type="button" @click="toggleMenu('height')" aria-haspopup="listbox" :aria-expanded="openMenu === 'height'">
+                {{ heightUnitText }}
+                <span class="chev" aria-hidden="true">▾</span>
+              </button>
+              <div class="unitMenu" role="listbox" aria-label="Height unit">
+                <button class="unitOption" type="button" role="option" :aria-selected="heightUnit === 'cm'" @click="setHeightUnit('cm')">
+                  centimeter (cm)
+                </button>
+                <button class="unitOption" type="button" role="option" :aria-selected="heightUnit === 'm'" @click="setHeightUnit('m')">
+                  meter (m)
+                </button>
+                <button class="unitOption" type="button" role="option" :aria-selected="heightUnit === 'ft'" @click="setHeightUnit('ft')">
+                  foot (ft)
+                </button>
+              </div>
             </div>
           </div>
         </label>
@@ -275,14 +318,22 @@ function reset() {
           <span class="label">Weight ({{ weightUnitText }})</span>
           <div class="inputRow">
             <input v-model.trim="weightValue" class="input" inputmode="decimal" autocomplete="off" :placeholder="weightPlaceholder" />
-            <div class="unitSelect">
-              <select v-model="weightUnit" class="nativeSelect" aria-label="Weight unit">
-                <option value="kg">kilogram (kg)</option>
-                <option value="jin">jin</option>
-                <option value="lb">pound (lb)</option>
-              </select>
-              <span class="selectText">{{ weightUnitText }}</span>
-              <span class="chev" aria-hidden="true">▾</span>
+            <div class="unitSelect" :class="{ open: openMenu === 'weight' }" @click.stop @keydown.esc="closeMenus">
+              <button class="unitBtn" type="button" @click="toggleMenu('weight')" aria-haspopup="listbox" :aria-expanded="openMenu === 'weight'">
+                {{ weightUnitText }}
+                <span class="chev" aria-hidden="true">▾</span>
+              </button>
+              <div class="unitMenu" role="listbox" aria-label="Weight unit">
+                <button class="unitOption" type="button" role="option" :aria-selected="weightUnit === 'kg'" @click="setWeightUnit('kg')">
+                  kilogram (kg)
+                </button>
+                <button class="unitOption" type="button" role="option" :aria-selected="weightUnit === 'jin'" @click="setWeightUnit('jin')">
+                  jin
+                </button>
+                <button class="unitOption" type="button" role="option" :aria-selected="weightUnit === 'lb'" @click="setWeightUnit('lb')">
+                  pound (lb)
+                </button>
+              </div>
             </div>
           </div>
         </label>
@@ -291,8 +342,8 @@ function reset() {
           <span class="label">Age (years)</span>
           <div class="inputRow">
             <input v-model.trim="ageValue" class="input" inputmode="numeric" autocomplete="off" :placeholder="agePlaceholder" />
-            <div class="unitSelect unitStub" aria-hidden="true">
-              <span class="selectText">yr</span>
+            <div class="unitStub" aria-hidden="true">
+              <span class="unitStubText">yr</span>
             </div>
           </div>
         </label>
@@ -534,6 +585,11 @@ function reset() {
 
 .unitSelect {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.unitBtn {
   height: 44px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -541,34 +597,94 @@ function reset() {
   color: rgba(255, 255, 255, 0.9);
   padding: 0 12px;
   font-weight: 700;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.unitSelect.unitStub {
-  pointer-events: none;
-  opacity: 0.95;
+.unitBtn:hover {
+  background: rgba(10, 16, 28, 0.62);
 }
 
-.nativeSelect {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.selectText {
-  pointer-events: none;
+.unitBtn:focus-visible {
+  outline: none;
+  border-color: rgba(251, 146, 60, 0.75);
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.14);
 }
 
 .chev {
   opacity: 0.75;
   font-size: 12px;
   transform: translateY(-1px);
+}
+
+.unitMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 16, 28, 0.92);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+}
+
+.unitSelect:hover .unitMenu,
+.unitSelect:focus-within .unitMenu,
+.unitSelect.open .unitMenu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.unitOption {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.unitOption:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.unitOption[aria-selected='true'] {
+  background: rgba(251, 146, 60, 0.16);
+  border: 1px solid rgba(251, 146, 60, 0.28);
+}
+
+.unitStub {
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 16, 28, 0.55);
+  color: rgba(255, 255, 255, 0.78);
+  padding: 0 12px;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.unitStubText {
   pointer-events: none;
 }
 
