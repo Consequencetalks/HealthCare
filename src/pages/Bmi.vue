@@ -265,6 +265,8 @@ const availableMonths = computed(() => {
 const selectedWeek = ref('')
 const selectedMonth = ref('')
 
+const weeksDesc = computed(() => availableWeeks.value.slice().reverse())
+
 function initTrendDefaults() {
   const w = availableWeeks.value
   const m = availableMonths.value
@@ -436,12 +438,12 @@ const trendPoints = computed(() => {
 
               <div
                 v-if="trendMode === 'week'"
-                class="unitMenu"
+                class="unitMenu trendMenu"
                 role="listbox"
                 aria-label="Select week"
               >
                 <button
-                  v-for="w in availableWeeks"
+                  v-for="w in weeksDesc"
                   :key="w.key"
                   class="unitOption"
                   type="button"
@@ -644,6 +646,36 @@ const trendPoints = computed(() => {
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
   z-index: 20;
+}
+
+.trendMenu {
+  min-width: 260px;
+  /* All weeks are scrollable; visible height ~= 5 items */
+  max-height: calc(5 * 40px + 12px); /* 5 rows + menu padding */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
+.trendMenu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.trendMenu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.trendMenu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.trendMenu .unitOption {
+  height: 40px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .unitSelect:hover .unitMenu,
