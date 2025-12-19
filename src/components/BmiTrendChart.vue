@@ -100,43 +100,52 @@ const gridLines = computed(() => {
 })
 
 const hoverIndex = ref(-1)
-const tooltip = ref({ x: 0, y: 0, show: false })
+const tooltip = ref({ left: 0, top: 0, show: false, placement: 'above' })
 
 function onMove(e) {
   const svg = e.currentTarget
   const rect = svg.getBoundingClientRect()
-  const x = e.clientX - rect.left
+  const xPx = e.clientX - rect.left
   const n = props.points.length
   if (n <= 0) return
 
-  const idx = n === 1 ? 0 : Math.round((x - P.l) / xStep.value)
+  // Convert CSS pixels -> SVG viewBox units (preserveAspectRatio="none")
+  const xSvg = rect.width ? (xPx / rect.width) * W : 0
+  const idx = n === 1 ? 0 : Math.round((xSvg - P.l) / xStep.value)
   const i = clamp(idx, 0, n - 1)
   hoverIndex.value = i
 
+  const ySvg = yAt(props.points[i].bmi)
+  const leftPx = rect.width ? (xAt(i) / W) * rect.width : 0
+  const topPx = rect.height ? (ySvg / H.value) * rect.height : 0
+  const placement = topPx < 56 ? 'below' : 'above'
+
   tooltip.value = {
-    x: xAt(i),
-    y: yAt(props.points[i].bmi),
+    left: leftPx,
+    top: topPx,
     show: true,
+    placement,
   }
 }
 
 function onLeave() {
   hoverIndex.value = -1
-  tooltip.value = { x: 0, y: 0, show: false }
+  tooltip.value = { left: 0, top: 0, show: false, placement: 'above' }
 }
 </script>
 
 <template>
   <div class="chart">
-    <svg
-      class="svg"
-      :viewBox="`0 0 ${W} ${H}`"
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="BMI trend chart"
-      @mousemove="onMove"
-      @mouseleave="onLeave"
-    >
+    <div class="frame">
+      <svg
+        class="svg"
+        :viewBox="`0 0 ${W} ${H}`"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="BMI trend chart"
+        @mousemove="onMove"
+        @mouseleave="onLeave"
+      >
       <defs>
         <linearGradient id="bmiLine" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#6ee7b7" />
@@ -189,11 +198,17 @@ function onLeave() {
 
       <!-- hover -->
       <g v-if="tooltip.show && hoverIndex >= 0" class="hover">
-        <line :x1="tooltip.x" :x2="tooltip.x" :y1="P.t" :y2="H - P.b" class="hoverLine" />
+        <line :x1="xAt(hoverIndex)" :x2="xAt(hoverIndex)" :y1="P.t" :y2="H - P.b" class="hoverLine" />
       </g>
-    </svg>
+      </svg>
+    </div>
 
-    <div v-if="tooltip.show && hoverIndex >= 0" class="tooltip" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+    <div
+      v-if="tooltip.show && hoverIndex >= 0"
+      class="tooltip"
+      :class="tooltip.placement"
+      :style="{ left: tooltip.left + 'px', top: tooltip.top + 'px' }"
+    >
       <div class="ttDate">{{ points[hoverIndex].date }}</div>
       <div class="ttVal">BMI {{ points[hoverIndex].bmi }}</div>
     </div>
@@ -207,7 +222,12 @@ function onLeave() {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  overflow: hidden;
+  overflow: visible; /* allow tooltip to escape */
+}
+
+.frame {
+  border-radius: 18px;
+  overflow: hidden; /* only clip the SVG */
 }
 
 .svg {
@@ -258,6 +278,11 @@ function onLeave() {
   pointer-events: none;
   color: rgba(255, 255, 255, 0.92);
   min-width: 120px;
+  z-index: 50;
+}
+
+.tooltip.below {
+  transform: translate(-50%, 14px);
 }
 
 .ttDate {
