@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>projtest</title>
+    <!--
+      GitHub Pages SPA fallback:
+      When refreshing a route like /bmi, GitHub Pages serves 404.html.
+      This redirects to /?/<route> so index.html can recover the correct route.
+
+      IMPORTANT: segmentCount=1 for project pages: https://<user>.github.io/<repo>/
+      Ref: https://github.com/rafgraph/spa-github-pages
+    -->
+    <script>
+      ;(function () {
+        var segmentCount = 1
+        var l = window.location
+        var path = l.pathname.split('/').slice(0, 1 + segmentCount).join('/')
+        var route = l.pathname.split('/').slice(1 + segmentCount).join('/')
+        var search = l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : ''
+        l.replace(
+          l.protocol +
+            '//' +
+            l.hostname +
+            (l.port ? ':' + l.port : '') +
+            path +
+            '/?/' +
+            route.replace(/&/g, '~and~') +
+            search +
+            l.hash
+        )
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>
+
+

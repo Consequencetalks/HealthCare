@@ -1,0 +1,25 @@
+{
+  "year": 2025,
+  "month": 12,
+  "days": [
+    { "day": "2025-12-01", "goalMl": 2000, "intakeMl": 0 },
+    { "day": "2025-12-02", "goalMl": 2000, "intakeMl": 250 },
+    { "day": "2025-12-03", "goalMl": 2000, "intakeMl": 800 },
+    { "day": "2025-12-04", "goalMl": 2000, "intakeMl": 1000 },
+    { "day": "2025-12-05", "goalMl": 2000, "intakeMl": 1400 },
+    { "day": "2025-12-06", "goalMl": 2000, "intakeMl": 2000 },
+    { "day": "2025-12-07", "goalMl": 2000, "intakeMl": 1600 },
+    { "day": "2025-12-08", "goalMl": 2000, "intakeMl": 300 },
+    { "day": "2025-12-09", "goalMl": 2100, "intakeMl": 1000 },
+    { "day": "2025-12-10", "goalMl": 2100, "intakeMl": 2100 },
+    { "day": "2025-12-12", "goalMl": 2000, "intakeMl": 500 },
+    { "day": "2025-12-14", "goalMl": 2000, "intakeMl": 1900 },
+    { "day": "2025-12-16", "goalMl": 2000, "intakeMl": 2000 },
+    { "day": "2025-12-18", "goalMl": 2000, "intakeMl": 1200 },
+    { "day": "2025-12-21", "goalMl": 2000, "intakeMl": 700 },
+    { "day": "2025-12-24", "goalMl": 2000, "intakeMl": 1999 },
+    { "day": "2025-12-28", "goalMl": 2000, "intakeMl": 2000 }
+  ]
+}
+
+

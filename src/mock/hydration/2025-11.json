@@ -1,0 +1,24 @@
+{
+  "year": 2025,
+  "month": 11,
+  "days": [
+    { "day": "2025-11-01", "goalMl": 2000, "intakeMl": 0 },
+    { "day": "2025-11-02", "goalMl": 2000, "intakeMl": 600 },
+    { "day": "2025-11-03", "goalMl": 2000, "intakeMl": 900 },
+    { "day": "2025-11-04", "goalMl": 2000, "intakeMl": 1200 },
+    { "day": "2025-11-05", "goalMl": 2000, "intakeMl": 1800 },
+    { "day": "2025-11-06", "goalMl": 2000, "intakeMl": 2000 },
+    { "day": "2025-11-07", "goalMl": 2200, "intakeMl": 1100 },
+    { "day": "2025-11-08", "goalMl": 2200, "intakeMl": 2100 },
+    { "day": "2025-11-09", "goalMl": 2000, "intakeMl": 300 },
+    { "day": "2025-11-10", "goalMl": 2000, "intakeMl": 1000 },
+    { "day": "2025-11-12", "goalMl": 2000, "intakeMl": 450 },
+    { "day": "2025-11-15", "goalMl": 1800, "intakeMl": 1800 },
+    { "day": "2025-11-18", "goalMl": 2000, "intakeMl": 1500 },
+    { "day": "2025-11-20", "goalMl": 2000, "intakeMl": 100 },
+    { "day": "2025-11-23", "goalMl": 2000, "intakeMl": 1999 },
+    { "day": "2025-11-26", "goalMl": 2000, "intakeMl": 2000 }
+  ]
+}
+
+
